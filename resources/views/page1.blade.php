@@ -6,11 +6,12 @@
     <title>Page 1</title>
 </head>
 <body>
-    @if($notLogged)
+            @if($notLogged)
         <h1>You must log in first!</h1>
         <a href="/">Go to Login</a>
     @else
         <h1>Hello {{ $user->name }}</h1>
+        <a href="/">Logout</a>
     @endif
 </body>
 </html>
