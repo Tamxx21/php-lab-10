@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -11,14 +12,13 @@ class UserController extends Controller
         return view('home');
     }
 
-    public function login(Request $request) {
-        // Validate user input
+    public function login(Request $request) 
+    {
         $creds = $request->validate([
             "name" => ["required"],
             "password" => ["required"]
         ]);
 
-        // Attempt authentication using Laravel Auth system
         if (auth()->attempt($creds)) {
             $request->session()->regenerate();
             return redirect('/page1');
@@ -31,7 +31,8 @@ class UserController extends Controller
         return view('register');
     }
 
-    public function register(Request $request) {
+    public function register(Request $request) 
+    {
         $incomingData = $request->validate([
             "name" => ["required", "string", "max:255"],
             "email" => ["required", "email", "max:255"],
@@ -40,29 +41,25 @@ class UserController extends Controller
 
         $incomingData["password"] = bcrypt($incomingData["password"]);
 
-        // Create user
         $user = User::create($incomingData);
 
-        // Auto-login (same as professor)
         auth()->login($user);
 
-        // Redirect home
         return redirect("/");
     }
 
-    public function page1() {
-    // Check if user is logged in
-    if (!session('user_id')) {
-        return view('page1')->with('notLogged', true);
+    public function page1() 
+    {
+        if (!auth()->check()) {
+            return view('page1', [
+                'notLogged' => true,
+                'user' => null
+            ]);
+        }
+
+        return view('page1', [
+            'notLogged' => false,
+            'user' => auth()->user()
+        ]);
     }
-
-    // If logged in, get the user
-    $user = User::find(session('user_id'));
-
-    return view('page1', [
-        'user' => $user,
-        'notLogged' => false
-    ]);
-}
-
 }
